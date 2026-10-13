@@ -2,50 +2,45 @@
 
 ## What this project is
 
-This repository contains a browser-based **Memory Game**, also known as
-**Concentration**. It is a single-page game built with HTML, CSS, and
-JavaScript. The player flips cards to find matching pairs of symbols and tries
-to complete the board in as few moves as possible.
+This repository contains standalone browser mini-games built with HTML, CSS,
+and JavaScript. The games run directly in a modern browser without external
+dependencies, a build step, or a server-side component.
 
-## How to play
+## Games
 
-- Open `memory-game.html` in a modern web browser.
-- Choose a 4x4 board with 8 pairs or a 6x6 board with 18 pairs.
-- Flip cards using a mouse or keyboard. Matching pairs stay revealed; other
-  cards turn face down again.
-- Complete every pair to finish the game.
-- Compare your moves, elapsed time, and star rating, then play again or choose
-  the other board size.
+### Memory Game
 
-## Features
+`memory-game.html` is a responsive Memory (Concentration) game. Choose a 4x4
+board with 8 pairs or a 6x6 board with 18 pairs, then find every matching pair.
+It includes animated emoji cards, a timer, move counter, star rating, keyboard
+controls, and best scores saved in browser local storage. A light/dark theme
+choice is also saved locally.
 
-- Responsive layouts for desktop and smaller screens.
-- Animated card flips and emoji symbols.
-- Move counter, game timer, and a move-based star rating.
-- Keyboard-operated cards and ARIA labels/live regions for accessibility.
-- Best scores saved in the browser's local storage.
+### Tic-Tac-Toe
 
-Scores are stored on the device and browser where the game is played; they are
-not synced to an account or other devices. Clearing the browser's site data may
-remove them.
+`tic-tac-toe.html` is a responsive single-player Tic-Tac-Toe game. The player
+goes first as X and plays against the computer as O. The computer takes
+available winning moves, blocks immediate threats, and otherwise chooses a
+center, corner, or open square. The current page session tracks player wins,
+computer wins, and draws.
 
-## How it is built and run
+Both games use semantic browser controls and are designed to work with a
+keyboard as well as a mouse.
 
-The game, styles, and game logic are contained in `memory-game.html`. It uses
-plain HTML, CSS Grid, and vanilla JavaScript, with no third-party libraries,
-build step, or server-side component.
+## How to run
 
-Open `memory-game.html` directly in a browser, or run a local server from the
-repository directory:
+Open either `memory-game.html` or `tic-tac-toe.html` directly in a modern web
+browser. Alternatively, start a local server from the repository directory:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then visit <http://localhost:8000/memory-game.html>.
+Then visit `http://localhost:8000/memory-game.html` or
+`http://localhost:8000/tic-tac-toe.html`.
 
 ## Repository name
 
-The repository is named `memory-game-GHCP`, but the README and application do
+The repository is named `memory-game-GHCP`, but the README and applications do
 not define an expansion for “GHCP.” This document does not assume what the
 suffix stands for.
