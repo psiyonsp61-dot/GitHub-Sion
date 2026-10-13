@@ -8,11 +8,32 @@
         /* Reset default styles and set up CSS custom properties for theming */
         :root {
             --primary-color: #2196f3;
+            --primary-hover: #1565c0;
+            --primary-active: #0d47a1;
             --background-color: #f5f5f5;
+            --surface-color: #ffffff;
             --card-back: #1976d2;
             --card-front: #ffffff;
             --text-color: #333333;
+            --border-color: #dddddd;
+            --surface-shadow: 0 2px 4px rgba(0,0,0,0.1);
             --success-color: #4caf50;
+            color-scheme: light;
+        }
+
+        :root[data-theme="dark"] {
+            --primary-color: #64b5f6;
+            --primary-hover: #90caf9;
+            --primary-active: #42a5f5;
+            --background-color: #121820;
+            --surface-color: #1e2935;
+            --card-back: #245b83;
+            --card-front: #2b3947;
+            --text-color: #edf2f7;
+            --border-color: #435363;
+            --surface-shadow: 0 2px 6px rgba(0,0,0,0.35);
+            --success-color: #81c784;
+            color-scheme: dark;
         }
 
         * {
@@ -54,10 +75,10 @@
             justify-content: space-around;
             flex-wrap: wrap;
             gap: 1rem;
-            background: white;
+            background: var(--surface-color);
             padding: 1rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--surface-shadow);
             margin-bottom: 2rem;
         }
 
@@ -78,21 +99,34 @@
 
         button {
             padding: 0.5rem 1rem;
-            border: none;
+            border: 1px solid transparent;
             border-radius: 4px;
             background: var(--primary-color);
-            color: white;
+            color: var(--button-text-color, #ffffff);
             cursor: pointer;
             font-size: 1rem;
             transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #1565c0;
+            background-color: var(--primary-hover);
         }
 
         button.active {
-            background-color: #0d47a1;
+            background-color: var(--primary-active);
+        }
+
+        button:focus-visible {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 3px;
+        }
+
+        :root[data-theme="dark"] button {
+            --button-text-color: #10202d;
+        }
+
+        .theme-toggle {
+            margin-top: 0.75rem;
         }
 
         /* Game grid styles with responsive layout */
@@ -146,7 +180,7 @@
             align-items: center;
             justify-content: center;
             font-size: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--surface-shadow);
         }
 
         .card-front {
@@ -173,12 +207,14 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-color);
             padding: 2rem;
             border-radius: 8px;
             text-align: center;
             max-width: 400px;
             width: 90%;
+            box-shadow: var(--surface-shadow);
         }
 
         /* Best scores section */
@@ -190,9 +226,12 @@
         .scores-list {
             max-width: 600px;
             margin: 1rem auto;
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-color);
             padding: 1rem;
             border-radius: 8px;
+            box-shadow: var(--surface-shadow);
+            border: 1px solid var(--border-color);
         }
 
         /* Responsive design adjustments */
@@ -240,6 +279,9 @@
         <div class="grid-selector">
             <button class="grid-btn active" data-size="4">4x4 Grid</button>
             <button class="grid-btn" data-size="6">6x6 Grid</button>
+            <div>
+                <button type="button" class="theme-toggle" aria-pressed="false">Switch to dark theme</button>
+            </div>
         </div>
 
         <!-- Game grid -->
@@ -286,6 +328,7 @@
             modal: document.querySelector('.modal'),
             finalStats: document.querySelector('.final-stats'),
             gridButtons: document.querySelectorAll('.grid-btn'),
+            themeToggle: document.querySelector('.theme-toggle'),
             scoresList: document.querySelector('.scores-list')
         };
 
@@ -397,10 +440,10 @@
                     date: new Date().toISOString()
                 };
                 
-                const scores = JSON.parse(localStorage.getItem('memoryGameScores') || '[]');
+                const scores = getSavedScores();
                 scores.push(score);
                 scores.sort((a, b) => a.moves - b.moves);
-                localStorage.setItem('memoryGameScores', JSON.stringify(scores.slice(0, 5)));
+                saveScores(scores.slice(0, 5));
                 
                 // Show win modal
                 elements.finalStats.textContent = `
@@ -416,7 +459,7 @@
 
         // Update the display of best scores
         function updateScoresList() {
-            const scores = JSON.parse(localStorage.getItem('memoryGameScores') || '[]');
+            const scores = getSavedScores();
             elements.scoresList.innerHTML = scores.length ? 
                 scores.map((score, index) => `
                     <p>${index + 1}. ${score.gridSize}x${score.gridSize} Grid - 
@@ -425,6 +468,45 @@
                        Rating: ${score.rating}</p>
                 `).join('') :
                 '<p>No scores yet. Start playing to set some records!</p>';
+        }
+
+        function getSavedScores() {
+            try {
+                return JSON.parse(localStorage.getItem('memoryGameScores') || '[]');
+            } catch (error) {
+                console.warn('Unable to read saved scores.', error);
+                return [];
+            }
+        }
+
+        function saveScores(scores) {
+            try {
+                localStorage.setItem('memoryGameScores', JSON.stringify(scores));
+            } catch (error) {
+                console.warn('Unable to save scores.', error);
+            }
+        }
+
+        function getSavedTheme() {
+            try {
+                return localStorage.getItem('memoryGameTheme') === 'dark' ? 'dark' : 'light';
+            } catch (error) {
+                console.warn('Unable to read the saved theme preference.', error);
+                return 'light';
+            }
+        }
+
+        function setTheme(theme) {
+            document.documentElement.dataset.theme = theme;
+            const isDark = theme === 'dark';
+            elements.themeToggle.textContent = `Switch to ${isDark ? 'light' : 'dark'} theme`;
+            elements.themeToggle.setAttribute('aria-pressed', String(isDark));
+
+            try {
+                localStorage.setItem('memoryGameTheme', theme);
+            } catch (error) {
+                console.warn('Unable to save the theme preference.', error);
+            }
         }
 
         // Handle card flip logic
@@ -498,7 +580,13 @@
             });
         });
 
+        elements.themeToggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            setTheme(nextTheme);
+        });
+
         // Initialize game
+        setTheme(getSavedTheme());
         updateScoresList();
         initializeGrid();
     </script>
